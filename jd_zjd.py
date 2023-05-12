@@ -41,10 +41,10 @@ class getJDCookie(object):
         elif os.path.exists('/jd/config/config.sh'):
             print("当前环境V4")
             return '/jd/config/config.sh'
-        elif os.path.exists(pwd + 'JDCookies.txt'):
-            return pwd + 'JDCookies.txt'
+        elif os.path.exists(f'{pwd}JDCookies.txt'):
+            return f'{pwd}JDCookies.txt'
         else:
-            return pwd + 'JDCookies.txt'
+            return f'{pwd}JDCookies.txt'
     # 获取cookie
     def getCookie(self):
         global cookies
@@ -58,15 +58,12 @@ class getJDCookie(object):
                     r = re.compile(r"pt_key=.*?pt_pin=.*?;", re.M | re.S | re.I)
                     cks = r.findall(cks)
                     if len(cks) > 0:
-                        cookies = ''
-                        for i in cks:
-                            cookies += i
+                        cookies = ''.join(cks)
             else:
-                with open(pwd + 'JDCookies.txt', "w", encoding="utf-8") as f:
+                with open(f'{pwd}JDCookies.txt', "w", encoding="utf-8") as f:
                     cks = "#多账号换行，以下示例：（通过正则获取此文件的ck，理论上可以自定义名字标记ck，也可以随意摆放ck）\n账号1【Curtinlv】cookie1;\n账号2【TopStyle】cookie2;"
                     f.write(cks)
                     f.close()
-                pass
         except Exception as e:
             print(f"【getCookie Error】{e}")
 
@@ -99,15 +96,15 @@ class getJDCookie(object):
         """
         :return: cookiesList,userNameList,pinNameList
         """
-        cookiesList = []
-        userNameList = []
-        pinNameList = []
         if 'pt_key=' in cookies and 'pt_pin=' in cookies:
             r = re.compile(r"pt_key=.*?pt_pin=.*?;", re.M | re.S | re.I)
             result = r.findall(cookies)
             if len(result) >= 1:
-                print("您已配置{}个账号".format(len(result)))
+                print(f"您已配置{len(result)}个账号")
                 u = 1
+                cookiesList = []
+                userNameList = []
+                pinNameList = []
                 for i in result:
                     r = re.compile(r"pt_pin=(.*?);")
                     pinName = r.findall(i)
@@ -122,11 +119,10 @@ class getJDCookie(object):
                         u += 1
                         continue
                     u += 1
-                if len(cookiesList) > 0 and len(userNameList) > 0:
+                if cookiesList and userNameList:
                     return cookiesList, userNameList, pinNameList
-                else:
-                    print("没有可用Cookie，已退出")
-                    exit(3)
+                print("没有可用Cookie，已退出")
+                exit(3)
             else:
                 print("cookie 格式错误！...本次操作已退出")
                 exit(4)
@@ -140,15 +136,13 @@ getCk.getCookie()
 
 # 获取系统ENV环境参数优先使用 适合Ac、云服务等环境
 # JD_COOKIE=cookie （多账号&分隔）
-if "JD_COOKIE" in os.environ:
-    if len(os.environ["JD_COOKIE"]) > 10:
-        cookies = os.environ["JD_COOKIE"]
-        print("已获取并使用Env环境 Cookie")
-if "zlzh" in os.environ:
-    if len(os.environ["zlzh"]) > 1:
-        zlzh = os.environ["zlzh"]
-        zlzh = zlzh.replace('[', '').replace(']', '').split(',')
-        print("已获取并使用Env环境 zlzh")
+if "JD_COOKIE" in os.environ and len(os.environ["JD_COOKIE"]) > 10:
+    cookies = os.environ["JD_COOKIE"]
+    print("已获取并使用Env环境 Cookie")
+if "zlzh" in os.environ and len(os.environ["zlzh"]) > 1:
+    zlzh = os.environ["zlzh"]
+    zlzh = zlzh.replace('[', '').replace(']', '').split(',')
+    print("已获取并使用Env环境 zlzh")
 
 
 
@@ -195,22 +189,20 @@ def getShareCode(headers):
 
 #设置请求头
 def setHeaders(cookie):
-    headers = {
+    return {
         'Cookie': cookie,
         'content-type': 'application/x-www-form-urlencoded',
         'Connection': 'keep-alive',
         'Accept-Encoding': 'gzip,compress,br,deflate',
         'Referer': 'https://servicewechat.com/wxa5bf5ee667d91626/148/page-frame.html',
         'Host': 'api.m.jd.com',
-        'User-Agent': 'Mozilla/5.0 (iPhone CPU iPhone OS 13_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.7(0x1800072d) NetType/WIFI Language/zh_CN'
+        'User-Agent': 'Mozilla/5.0 (iPhone CPU iPhone OS 13_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.7(0x1800072d) NetType/WIFI Language/zh_CN',
     }
-
-    return headers
 
 def assist(ck, sid, eid, aid, user, name, a):
     timestamp = int(round(t * 1000))
     headers = {
-        'Cookie': ck + 'wxclient=gxhwx;ie_ai=1;',
+        'Cookie': f'{ck}wxclient=gxhwx;ie_ai=1;',
         'Accept': '*/*',
         'Connection': 'keep-alive',
         'Referer': 'https://servicewechat.com/wxa5bf5ee667d91626/148/page-frame.html',
@@ -218,9 +210,9 @@ def assist(ck, sid, eid, aid, user, name, a):
         'Host': 'api.m.jd.com',
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.1(0x1800012a) NetType/WIFI Language/zh_CN',
         'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-cn'
+        'Accept-Language': 'zh-cn',
     }
-    url = 'https://api.m.jd.com/api?functionId=vvipclub_distributeBean_assist&body=%7B%22activityIdEncrypted%22:%22' + sid + '%5Cn%22,%22assistStartRecordId%22:%22' + str(aid) + '%22,%22assistedPinEncrypted%22:%22' + eid + '%5Cn%22,%22channel%22:%22FISSION_BEAN%22%7D&appid=swat_miniprogram&client=tjj_m&screen=1920*1080&osVersion=5.0.0&networkType=wifi&sdkName=orderDetail&sdkVersion=1.0.0&clientVersion=3.1.3&area=1_72_4137_0&fromType=wxapp&timestamp=' + str(timestamp)
+    url = f'https://api.m.jd.com/api?functionId=vvipclub_distributeBean_assist&body=%7B%22activityIdEncrypted%22:%22{sid}%5Cn%22,%22assistStartRecordId%22:%22{str(aid)}%22,%22assistedPinEncrypted%22:%22{eid}%5Cn%22,%22channel%22:%22FISSION_BEAN%22%7D&appid=swat_miniprogram&client=tjj_m&screen=1920*1080&osVersion=5.0.0&networkType=wifi&sdkName=orderDetail&sdkVersion=1.0.0&clientVersion=3.1.3&area=1_72_4137_0&fromType=wxapp&timestamp={timestamp}'
     resp = requests.get(url, headers=headers, verify=False, timeout=30).json()
     if resp['success']:
         print(f"用户{a}【{user}】助力【{name}】成功~")
@@ -246,11 +238,9 @@ def start():
         getShareCode(header)
         a = 1
         for i, name in zip(cookiesList, userNameList):
-            if a == ckNum:
-                a += 1
-            else:
+            if a != ckNum:
                 assist(i, sid, encPin, assistStartRecordId, name, userNameList[int(ckNum)-1], a)
-                a += 1
+            a += 1
 
 if __name__ == '__main__':
     start()

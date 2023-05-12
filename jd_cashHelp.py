@@ -59,9 +59,9 @@ cashCountdict = {}
 
 def getEnvs(label):
     try:
-        if label == 'True' or label == 'yes' or label == 'true' or label == 'Yes':
+        if label in ['True', 'yes', 'true', 'Yes']:
             return True
-        elif label == 'False' or label == 'no' or label == 'false' or label == 'No':
+        elif label in ['False', 'no', 'false', 'No']:
             return False
     except Exception as e:
         pass
@@ -82,7 +82,7 @@ class getJDCookie(object):
 
     def getckfile(self):
         global v4f
-        curf = pwd + 'JDCookies.txt'
+        curf = f'{pwd}JDCookies.txt'
         v4f = '/jd/config/config.sh'
         ql_new = '/ql/config/env.sh'
         ql_old = '/ql/config/cookie.sh'
@@ -94,8 +94,6 @@ class getJDCookie(object):
             cks = r.findall(cks)
             if len(cks) > 0:
                 return curf
-            else:
-                pass
         if os.path.exists(ql_new):
             print("当前环境青龙面板新版")
             return ql_new
@@ -122,22 +120,16 @@ class getJDCookie(object):
                     if len(cks) > 0:
                         if 'JDCookies.txt' in ckfile:
                             print("当前获取使用 JDCookies.txt 的cookie")
-                        cookies = ''
-                        for i in cks:
-                            if 'pt_key=xxxx' in i:
-                                pass
-                            else:
-                                cookies += i
+                        cookies = ''.join(i for i in cks if 'pt_key=xxxx' not in i)
                         return
             else:
-                with open(pwd + 'JDCookies.txt', "w", encoding="utf-8") as f:
+                with open(f'{pwd}JDCookies.txt', "w", encoding="utf-8") as f:
                     cks = "#多账号换行，以下示例：（通过正则获取此文件的ck，理论上可以自定义名字标记ck，也可以随意摆放ck）\n账号1【Curtinlv】cookie1;\n账号2【TopStyle】cookie2;"
                     f.write(cks)
                     f.close()
-            if "JD_COOKIE" in os.environ:
-                if len(os.environ["JD_COOKIE"]) > 10:
-                    cookies = os.environ["JD_COOKIE"]
-                    print("已获取并使用Env环境 Cookie")
+            if "JD_COOKIE" in os.environ and len(os.environ["JD_COOKIE"]) > 10:
+                cookies = os.environ["JD_COOKIE"]
+                print("已获取并使用Env环境 Cookie")
         except Exception as e:
             print(f"【getCookie Error】{e}")
 
@@ -170,15 +162,15 @@ class getJDCookie(object):
         """
         :return: cookiesList,userNameList,pinNameList
         """
-        cookiesList = []
-        userNameList = []
-        pinNameList = []
         if 'pt_key=' in cookies and 'pt_pin=' in cookies:
             r = re.compile(r"pt_key=.*?pt_pin=.*?;", re.M | re.S | re.I)
             result = r.findall(cookies)
             if len(result) >= 1:
-                print("您已配置{}个账号".format(len(result)))
+                print(f"您已配置{len(result)}个账号")
                 u = 1
+                cookiesList = []
+                userNameList = []
+                pinNameList = []
                 for i in result:
                     r = re.compile(r"pt_pin=(.*?);")
                     pinName = r.findall(i)
@@ -193,11 +185,10 @@ class getJDCookie(object):
                         u += 1
                         continue
                     u += 1
-                if len(cookiesList) > 0 and len(userNameList) > 0:
+                if cookiesList and userNameList:
                     return cookiesList, userNameList, pinNameList
-                else:
-                    print("没有可用Cookie，已退出")
-                    exit(3)
+                print("没有可用Cookie，已退出")
+                exit(3)
             else:
                 print("cookie 格式错误！...本次操作已退出")
                 exit(4)
@@ -221,11 +212,10 @@ try:
 except:
     pass
 
-if "cash_zlzh" in os.environ:
-    if len(os.environ["cash_zlzh"]) > 1:
-        cash_zlzh = os.environ["cash_zlzh"]
-        cash_zlzh = cash_zlzh.replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-        print("已获取并使用Env环境 cash_zlzh:", cash_zlzh)
+if "cash_zlzh" in os.environ and len(os.environ["cash_zlzh"]) > 1:
+    cash_zlzh = os.environ["cash_zlzh"]
+    cash_zlzh = cash_zlzh.replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
+    print("已获取并使用Env环境 cash_zlzh:", cash_zlzh)
 
 
 
@@ -238,9 +228,9 @@ class msg(object):
         global msg_info
         print(self.str_msg)
         try:
-            msg_info = "{}\n{}".format(msg_info, self.str_msg)
+            msg_info = f"{msg_info}\n{self.str_msg}"
         except:
-            msg_info = "{}".format(self.str_msg)
+            msg_info = f"{self.str_msg}"
         sys.stdout.flush()
     def getsendNotify(self, a=0):
         if a == 0:
@@ -251,23 +241,18 @@ class msg(object):
             if 'curtinlv' in response.text:
                 with open('sendNotify.py', "w+", encoding="utf-8") as f:
                     f.write(response.text)
-            else:
-                if a < 5:
-                    a += 1
-                    return self.getsendNotify(a)
-                else:
-                    pass
+            elif a < 5:
+                a += 1
+                return self.getsendNotify(a)
         except:
             if a < 5:
                 a += 1
                 return self.getsendNotify(a)
-            else:
-                pass
     def main(self):
         global send
         cur_path = os.path.abspath(os.path.dirname(__file__))
         sys.path.append(cur_path)
-        if os.path.exists(cur_path + "/sendNotify.py"):
+        if os.path.exists(f"{cur_path}/sendNotify.py"):
             try:
                 from sendNotify import send
             except:
@@ -292,30 +277,28 @@ def userAgent():
     jdapp;iPhone;10.0.4;14.2;9fb54498b32e17dfc5717744b5eaecda8366223c;network/wifi;ADID/2CF597D0-10D8-4DF8-C5A2-61FD79AC8035;model/iPhone11,1;addressid/7785283669;appBuild/167707;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/null;supportJDSHWK/1
     :return: ua
     """
-    if not UserAgent:
-        uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
-        addressid = ''.join(random.sample('1234567898647', 10))
-        iosVer = ''.join(random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
-        iosV = iosVer.replace('.', '_')
-        iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
-        ADID = ''.join(random.sample('0987654321ABCDEF', 8)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 12))
-        return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/{ADID};model/iPhone{iPhone},1;addressid/{addressid};appBuild/167707;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS {iosV} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/null;supportJDSHWK/1'
-    else:
+    if UserAgent:
         return UserAgent
+    uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
+    addressid = ''.join(random.sample('1234567898647', 10))
+    iosVer = ''.join(random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
+    iosV = iosVer.replace('.', '_')
+    iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
+    ADID = ''.join(random.sample('0987654321ABCDEF', 8)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 12))
+    return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/{ADID};model/iPhone{iPhone},1;addressid/{addressid};appBuild/167707;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS {iosV} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/null;supportJDSHWK/1'
 
 def buildHeader(ck):
-    headers = {
+    return {
         'Origin': 'https://h5.m.jd.com',
         'Cookie': ck,
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/plain, */*',
-        'Referer': f'https://h5.m.jd.com/babelDiy/Zeus/GzY6gTjVg1zqnQRnmWfMKC4PsT1/index.html?lng=&lat=&sid=&un_area=',
+        'Referer': 'https://h5.m.jd.com/babelDiy/Zeus/GzY6gTjVg1zqnQRnmWfMKC4PsT1/index.html?lng=&lat=&sid=&un_area=',
         'Host': 'api.m.jd.com',
         'User-Agent': userAgent(),
         'Accept-Language': 'zh-cn',
-        'Accept-Encoding': 'gzip, deflate, br'
+        'Accept-Encoding': 'gzip, deflate, br',
     }
-    return headers
 
 def getShareCode(header):
     global aNum
@@ -348,11 +331,7 @@ def helpCode(header, inviteCode, shareDate, uNUm, user, name):
             return False
         else:
             print(f'用户{uNUm}【{user}】助力【{name}】{resp["data"]["bizMsg"]}')
-            if '晚' in resp["data"]["bizMsg"]:
-                return True
-            else:
-                return False
-
+            return '晚' in resp["data"]["bizMsg"]
     except Exception as e:
         print("helpCode Error", e)
         print(f'用户{uNUm}【{user}】助力【{name}】报错了！')

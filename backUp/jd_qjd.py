@@ -64,7 +64,7 @@ message_info = ''''''
 def message(str_msg):
     global message_info
     print(str_msg)
-    message_info = "{}\n{}".format(message_info, str_msg)
+    message_info = f"{message_info}\n{str_msg}"
     sys.stdout.flush()
 def getsendNotify(a=0):
     if a == 0:
@@ -75,21 +75,16 @@ def getsendNotify(a=0):
         if 'main' in response.text:
             with open('sendNotify.py', "w+", encoding="utf-8") as f:
                 f.write(response.text)
-        else:
-            if a < 5:
-                a += 1
-                return getsendNotify(a)
-            else:
-                pass
+        elif a < 5:
+            a += 1
+            return getsendNotify(a)
     except:
         if a < 5:
             a += 1
             return getsendNotify(a)
-        else:
-            pass
 cur_path = os.path.abspath(os.path.dirname(__file__))
 sys.path.append(cur_path)
-if os.path.exists(cur_path + "/sendNotify.py"):
+if os.path.exists(f"{cur_path}/sendNotify.py"):
     from sendNotify import send
 else:
     getsendNotify()
@@ -103,8 +98,8 @@ else:
 class getJDCookie(object):
     # 适配各种平台环境ck
     def getckfile(self):
-        if os.path.exists(pwd + 'JDCookies.txt'):
-            return pwd + 'JDCookies.txt'
+        if os.path.exists(f'{pwd}JDCookies.txt'):
+            return f'{pwd}JDCookies.txt'
         elif os.path.exists('/ql/config/env.sh'):
             print("当前环境青龙面板新版")
             return '/ql/config/env.sh'
@@ -114,9 +109,9 @@ class getJDCookie(object):
         elif os.path.exists('/jd/config/config.sh'):
             print("当前环境V4")
             return '/jd/config/config.sh'
-        elif os.path.exists(pwd + 'JDCookies.txt'):
-            return pwd + 'JDCookies.txt'
-        return pwd + 'JDCookies.txt'
+        elif os.path.exists(f'{pwd}JDCookies.txt'):
+            return f'{pwd}JDCookies.txt'
+        return f'{pwd}JDCookies.txt'
 
     # 获取cookie
     def getCookie(self):
@@ -133,19 +128,16 @@ class getJDCookie(object):
                     if len(cks) > 0:
                         if 'JDCookies.txt' in ckfile:
                             print("当前获取使用 JDCookies.txt 的cookie")
-                        cookies = ''
-                        for i in cks:
-                            cookies += i
+                        cookies = ''.join(cks)
                         return
             else:
-                with open(pwd + 'JDCookies.txt', "w", encoding="utf-8") as f:
+                with open(f'{pwd}JDCookies.txt', "w", encoding="utf-8") as f:
                     cks = "#多账号换行，以下示例：（通过正则获取此文件的ck，理论上可以自定义名字标记ck，也可以随意摆放ck）\n账号1【Curtinlv】cookie1;\n账号2【TopStyle】cookie2;"
                     f.write(cks)
                     f.close()
-            if "JD_COOKIE" in os.environ:
-                if len(os.environ["JD_COOKIE"]) > 10:
-                    cookies = os.environ["JD_COOKIE"]
-                    print("已获取并使用Env环境 Cookie")
+            if "JD_COOKIE" in os.environ and len(os.environ["JD_COOKIE"]) > 10:
+                cookies = os.environ["JD_COOKIE"]
+                print("已获取并使用Env环境 Cookie")
         except Exception as e:
             print(f"【getCookie Error】{e}")
 
@@ -178,15 +170,15 @@ class getJDCookie(object):
         """
         :return: cookiesList,userNameList,pinNameList
         """
-        cookiesList = []
-        userNameList = []
-        pinNameList = []
         if 'pt_key=' in cookies and 'pt_pin=' in cookies:
             r = re.compile(r"pt_key=.*?pt_pin=.*?;", re.M | re.S | re.I)
             result = r.findall(cookies)
             if len(result) >= 1:
-                print("您已配置{}个账号".format(len(result)))
+                print(f"您已配置{len(result)}个账号")
                 u = 1
+                cookiesList = []
+                userNameList = []
+                pinNameList = []
                 for i in result:
                     r = re.compile(r"pt_pin=(.*?);")
                     pinName = r.findall(i)
@@ -201,11 +193,10 @@ class getJDCookie(object):
                         u += 1
                         continue
                     u += 1
-                if len(cookiesList) > 0 and len(userNameList) > 0:
+                if cookiesList and userNameList:
                     return cookiesList, userNameList, pinNameList
-                else:
-                    print("没有可用Cookie，已退出")
-                    exit(3)
+                print("没有可用Cookie，已退出")
+                exit(3)
             else:
                 print("cookie 格式错误！...本次操作已退出")
                 exit(4)
@@ -215,32 +206,30 @@ class getJDCookie(object):
 getCk = getJDCookie()
 getCk.getCookie()
 
-if "qjd_zlzh" in os.environ:
-    if len(os.environ["qjd_zlzh"]) > 1:
-        qjd_zlzh = os.environ["qjd_zlzh"]
-        qjd_zlzh = qjd_zlzh.replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
-        print("已获取并使用Env环境 qjd_zlzh:", qjd_zlzh)
+if "qjd_zlzh" in os.environ and len(os.environ["qjd_zlzh"]) > 1:
+    qjd_zlzh = os.environ["qjd_zlzh"]
+    qjd_zlzh = qjd_zlzh.replace('[', '').replace(']', '').replace('\'', '').replace(' ', '').split(',')
+    print("已获取并使用Env环境 qjd_zlzh:", qjd_zlzh)
 
 def userAgent():
     """
     随机生成一个UA
     :return:
     """
-    if not UserAgent:
-        uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
-        iosVer = ''.join(random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
-        iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
-        return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/8679C062-A41A-4A25-88F1-50A7A3EEF34A;model/iPhone{iPhone},1;addressid/3723896896;appBuild/167707;jdSupportDarkMode/0'
-    else:
+    if UserAgent:
         return UserAgent
+    uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
+    iosVer = ''.join(random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
+    iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
+    return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/8679C062-A41A-4A25-88F1-50A7A3EEF34A;model/iPhone{iPhone},1;addressid/3723896896;appBuild/167707;jdSupportDarkMode/0'
 
 def getShareCode(ck):
     global aNum
     try:
         # uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
         v_num1 = ''.join(random.sample(["1", "2", "3", "4", "5", "6", "7", "8", "9"], 1)) + ''.join(random.sample(string.digits, 4))
-        url1 = f'https://api.m.jd.com/client.action?functionId=signGroupHit&body=%7B%22activeType%22%3A2%7D&appid=ld&client=apple&clientVersion=10.0.6&networkType=wifi&osVersion=14.3&uuid=&jsonp=jsonp_' + str(int(round(t * 1000))) + '_' + v_num1
-        url = 'https://api.m.jd.com/client.action?functionId=signBeanGroupStageIndex&body=%7B%22monitor_refer%22%3A%22%22%2C%22rnVersion%22%3A%223.9%22%2C%22fp%22%3A%22-1%22%2C%22shshshfp%22%3A%22-1%22%2C%22shshshfpa%22%3A%22-1%22%2C%22referUrl%22%3A%22-1%22%2C%22userAgent%22%3A%22-1%22%2C%22jda%22%3A%22-1%22%2C%22monitor_source%22%3A%22bean_m_bean_index%22%7D&appid=ld&client=apple&clientVersion=&networkType=&osVersion=&uuid=&jsonp=jsonp_' + str(int(round(t * 1000))) + '_' + v_num1
+        url1 = f'https://api.m.jd.com/client.action?functionId=signGroupHit&body=%7B%22activeType%22%3A2%7D&appid=ld&client=apple&clientVersion=10.0.6&networkType=wifi&osVersion=14.3&uuid=&jsonp=jsonp_{int(round(t * 1000))}_{v_num1}'
+        url = f'https://api.m.jd.com/client.action?functionId=signBeanGroupStageIndex&body=%7B%22monitor_refer%22%3A%22%22%2C%22rnVersion%22%3A%223.9%22%2C%22fp%22%3A%22-1%22%2C%22shshshfp%22%3A%22-1%22%2C%22shshshfpa%22%3A%22-1%22%2C%22referUrl%22%3A%22-1%22%2C%22userAgent%22%3A%22-1%22%2C%22jda%22%3A%22-1%22%2C%22monitor_source%22%3A%22bean_m_bean_index%22%7D&appid=ld&client=apple&clientVersion=&networkType=&osVersion=&uuid=&jsonp=jsonp_{int(round(t * 1000))}_{v_num1}'
         head = {
             'Cookie': ck,
             'Accept': '*/*',
@@ -275,7 +264,7 @@ def getShareCode(ck):
         aNum = 0
         return groupCode, shareCode, sumBeanNumStr, activityId
     except Exception as e:
-        print(f"getShareCode Error", e)
+        print("getShareCode Error", e)
 
 def helpCode(ck, groupCode, shareCode,u, unum, user, activityId):
     try:
@@ -290,7 +279,10 @@ def helpCode(ck, groupCode, shareCode,u, unum, user, activityId):
             'User-Agent': userAgent(),
             'Accept-Language': 'zh-cn'
         }
-        url = 'https://api.m.jd.com/client.action?functionId=signGroupHelp&body=%7B%22activeType%22%3A2%2C%22groupCode%22%3A%22' + str(groupCode) + '%22%2C%22shareCode%22%3A%22' + shareCode + f'%22%2C%22activeId%22%3A%22{activityId}%22%2C%22source%22%3A%22guest%22%7D&appid=ld&client=apple&clientVersion=10.0.4&networkType=wifi&osVersion=13.7&uuid=&openudid=&jsonp=jsonp_{int(round(t * 1000))}_{v_num1}'
+        url = (
+            f'https://api.m.jd.com/client.action?functionId=signGroupHelp&body=%7B%22activeType%22%3A2%2C%22groupCode%22%3A%22{str(groupCode)}%22%2C%22shareCode%22%3A%22{shareCode}'
+            + f'%22%2C%22activeId%22%3A%22{activityId}%22%2C%22source%22%3A%22guest%22%7D&appid=ld&client=apple&clientVersion=10.0.4&networkType=wifi&osVersion=13.7&uuid=&openudid=&jsonp=jsonp_{int(round(t * 1000))}_{v_num1}'
+        )
         resp = requests.get(url=url, headers=headers, verify=False, timeout=30).text
         r = re.compile(r'jsonp_.*?\((.*?)\)\;', re.M | re.S | re.I)
         result = r.findall(resp)
@@ -302,15 +294,13 @@ def helpCode(ck, groupCode, shareCode,u, unum, user, activityId):
             if '满' in helpToast:
                 print(f"## 恭喜账号【{user}】团已满，今日累计获得160豆")
                 return True
-            return False
+        elif '火' in helpToast:
+            print(f"账号{unum}【{u}】助力失败! 原因：{helpToast}")
         else:
-            if '火' in helpToast:
-                print(f"账号{unum}【{u}】助力失败! 原因：{helpToast}")
-            else:
-                print(f"账号{unum}【{u}】{helpToast} , 您也获得1豆哦~")
-            return False
+            print(f"账号{unum}【{u}】{helpToast} , 您也获得1豆哦~")
+        return False
     except Exception as e:
-        print(f"helpCode Error ", e)
+        print("helpCode Error ", e)
 
 def start():
     scriptName='### 全民抢京豆-助力 ###'

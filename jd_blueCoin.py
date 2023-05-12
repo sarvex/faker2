@@ -51,9 +51,9 @@ def printT(s):
 
 def getEnvs(label):
     try:
-        if label == 'True' or label == 'yes' or label == 'true' or label == 'Yes':
+        if label in ['True', 'yes', 'true', 'Yes']:
             return True
-        elif label == 'False' or label == 'no' or label == 'false' or label == 'No':
+        elif label in ['False', 'no', 'false', 'No']:
             return False
     except:
         pass
@@ -74,7 +74,7 @@ class getJDCookie(object):
 
     def getckfile(self):
         global v4f
-        curf = pwd + 'JDCookies.txt'
+        curf = f'{pwd}JDCookies.txt'
         v4f = '/jd/config/config.sh'
         ql_new = '/ql/config/env.sh'
         ql_old = '/ql/config/cookie.sh'
@@ -86,8 +86,6 @@ class getJDCookie(object):
             cks = r.findall(cks)
             if len(cks) > 0:
                 return curf
-            else:
-                pass
         if os.path.exists(ql_new):
             printT("当前环境青龙面板新版")
             return ql_new
@@ -114,22 +112,16 @@ class getJDCookie(object):
                     if len(cks) > 0:
                         if 'JDCookies.txt' in ckfile:
                             printT("当前获取使用 JDCookies.txt 的cookie")
-                        cookies = ''
-                        for i in cks:
-                            if 'pt_key=xxxx' in i:
-                                pass
-                            else:
-                                cookies += i
+                        cookies = ''.join(i for i in cks if 'pt_key=xxxx' not in i)
                         return
             else:
-                with open(pwd + 'JDCookies.txt', "w", encoding="utf-8") as f:
+                with open(f'{pwd}JDCookies.txt', "w", encoding="utf-8") as f:
                     cks = "#多账号换行，以下示例：（通过正则获取此文件的ck，理论上可以自定义名字标记ck，也可以随意摆放ck）\n账号1【Curtinlv】cookie1;\n账号2【TopStyle】cookie2;"
                     f.write(cks)
                     f.close()
-            if "JD_COOKIE" in os.environ:
-                if len(os.environ["JD_COOKIE"]) > 10:
-                    cookies = os.environ["JD_COOKIE"]
-                    printT("已获取并使用Env环境 Cookie")
+            if "JD_COOKIE" in os.environ and len(os.environ["JD_COOKIE"]) > 10:
+                cookies = os.environ["JD_COOKIE"]
+                printT("已获取并使用Env环境 Cookie")
         except Exception as e:
             printT(f"【getCookie Error】{e}")
 
@@ -162,15 +154,15 @@ class getJDCookie(object):
         """
         :return: cookiesList,userNameList,pinNameList
         """
-        cookiesList = []
-        userNameList = []
-        pinNameList = []
         if 'pt_key=' in cookies and 'pt_pin=' in cookies:
             r = re.compile(r"pt_key=.*?pt_pin=.*?;", re.M | re.S | re.I)
             result = r.findall(cookies)
             if len(result) >= 1:
-                printT("您已配置{}个账号".format(len(result)))
+                printT(f"您已配置{len(result)}个账号")
                 u = 1
+                cookiesList = []
+                userNameList = []
+                pinNameList = []
                 for i in result:
                     r = re.compile(r"pt_pin=(.*?);")
                     pinName = r.findall(i)
@@ -185,11 +177,10 @@ class getJDCookie(object):
                         u += 1
                         continue
                     u += 1
-                if len(cookiesList) > 0 and len(userNameList) > 0:
+                if cookiesList and userNameList:
                     return cookiesList, userNameList, pinNameList
-                else:
-                    printT("没有可用Cookie，已退出")
-                    exit(3)
+                printT("没有可用Cookie，已退出")
+                exit(3)
             else:
                 printT("cookie 格式错误！...本次操作已退出")
                 exit(4)
@@ -215,18 +206,15 @@ except:
 
 
 
-if "coinToBeans" in os.environ:
-    if len(os.environ["coinToBeans"]) > 1:
-        coinToBeans = os.environ["coinToBeans"]
-        printT(f"已获取并使用Env环境 coinToBeans:{coinToBeans}")
-if "blueCoin_Cc" in os.environ:
-    if len(os.environ["blueCoin_Cc"]) > 1:
-        blueCoin_Cc = getEnvs(os.environ["blueCoin_Cc"])
-        printT(f"已获取并使用Env环境 blueCoin_Cc:{blueCoin_Cc}")
-if "dd_thread" in os.environ:
-    if len(os.environ["dd_thread"]) > 1:
-        dd_thread = getEnvs(os.environ["dd_thread"])
-        printT(f"已获取并使用Env环境 dd_thread:{dd_thread}")
+if "coinToBeans" in os.environ and len(os.environ["coinToBeans"]) > 1:
+    coinToBeans = os.environ["coinToBeans"]
+    printT(f"已获取并使用Env环境 coinToBeans:{coinToBeans}")
+if "blueCoin_Cc" in os.environ and len(os.environ["blueCoin_Cc"]) > 1:
+    blueCoin_Cc = getEnvs(os.environ["blueCoin_Cc"])
+    printT(f"已获取并使用Env环境 blueCoin_Cc:{blueCoin_Cc}")
+if "dd_thread" in os.environ and len(os.environ["dd_thread"]) > 1:
+    dd_thread = getEnvs(os.environ["dd_thread"])
+    printT(f"已获取并使用Env环境 dd_thread:{dd_thread}")
 class TaskThread(threading.Thread):
     """
     处理task相关的线程类
@@ -254,19 +242,18 @@ def userAgent():
     随机生成一个UA
     :return: jdapp;iPhone;9.4.8;14.3;xxxx;network/wifi;ADID/201EDE7F-5111-49E8-9F0D-CCF9677CD6FE;supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone13,4;addressid/2455696156;supportBestPay/0;appBuild/167629;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1
     """
-    if not UserAgent:
-        uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
-        addressid = ''.join(random.sample('1234567898647', 10))
-        iosVer = ''.join(
-            random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
-        iosV = iosVer.replace('.', '_')
-        iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
-        ADID = ''.join(random.sample('0987654321ABCDEF', 8)) + '-' + ''.join(
-            random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(
-            random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 12))
-        return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/{ADID};supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone{iPhone},1;addressid/{addressid};supportBestPay/0;appBuild/167629;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS {iosV} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1'
-    else:
+    if UserAgent:
         return UserAgent
+    uuid = ''.join(random.sample('123456789abcdef123456789abcdef123456789abcdef123456789abcdef', 40))
+    addressid = ''.join(random.sample('1234567898647', 10))
+    iosVer = ''.join(
+        random.sample(["14.5.1", "14.4", "14.3", "14.2", "14.1", "14.0.1", "13.7", "13.1.2", "13.1.1"], 1))
+    iosV = iosVer.replace('.', '_')
+    iPhone = ''.join(random.sample(["8", "9", "10", "11", "12", "13"], 1))
+    ADID = ''.join(random.sample('0987654321ABCDEF', 8)) + '-' + ''.join(
+        random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(
+        random.sample('0987654321ABCDEF', 4)) + '-' + ''.join(random.sample('0987654321ABCDEF', 12))
+    return f'jdapp;iPhone;10.0.4;{iosVer};{uuid};network/wifi;ADID/{ADID};supportApplePay/0;hasUPPay/0;hasOCPay/0;model/iPhone{iPhone},1;addressid/{addressid};supportBestPay/0;appBuild/167629;jdSupportDarkMode/0;Mozilla/5.0 (iPhone; CPU iPhone OS {iosV} like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148;supportJDSHWK/1'
 
 ## 获取通知服务
 class msg(object):
@@ -277,9 +264,9 @@ class msg(object):
         global msg_info
         printT(self.str_msg)
         try:
-            msg_info = "{}\n{}".format(msg_info, self.str_msg)
+            msg_info = f"{msg_info}\n{self.str_msg}"
         except:
-            msg_info = "{}".format(self.str_msg)
+            msg_info = f"{self.str_msg}"
         sys.stdout.flush()
     def getsendNotify(self, a=0):
         if a == 0:
@@ -290,23 +277,18 @@ class msg(object):
             if 'curtinlv' in response.text:
                 with open('sendNotify.py', "w+", encoding="utf-8") as f:
                     f.write(response.text)
-            else:
-                if a < 5:
-                    a += 1
-                    return self.getsendNotify(a)
-                else:
-                    pass
+            elif a < 5:
+                a += 1
+                return self.getsendNotify(a)
         except:
             if a < 5:
                 a += 1
                 return self.getsendNotify(a)
-            else:
-                pass
     def main(self):
         global send
         cur_path = os.path.abspath(os.path.dirname(__file__))
         sys.path.append(cur_path)
-        if os.path.exists(cur_path + "/sendNotify.py"):
+        if os.path.exists(f"{cur_path}/sendNotify.py"):
             try:
                 from sendNotify import send
             except:
@@ -326,18 +308,17 @@ msg().main()
 
 
 def setHeaders(cookie):
-    headers = {
+    return {
         'Origin': 'https://jdsupermarket.jd.com',
         'Cookie': cookie,
         'Connection': 'keep-alive',
         'Accept': 'application/json, text/plain, */*',
-        'Referer': 'https://jdsupermarket.jd.com/game/?tt={}'.format(int(round(time.time() * 1000))-314),
+        'Referer': f'https://jdsupermarket.jd.com/game/?tt={int(round(time.time() * 1000)) - 314}',
         'Host': 'api.m.jd.com',
         'User-Agent': userAgent(),
         'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'zh-cn'
+        'Accept-Language': 'zh-cn',
     }
-    return headers
 
 #查询东东超市蓝币数量
 def getBlueCoinInfo(headers):
@@ -348,19 +329,17 @@ def getBlueCoinInfo(headers):
         if result['data']['bizCode'] == 0:
             totalBlue = result['data']['result']['totalBlue']
             shopName = result['data']['result']['shopName']
-            return totalBlue, shopName
         else:
             totalBlue = 0
             shopName = result['data']['bizMsg']
-            return totalBlue, shopName
+        return totalBlue, shopName
     except Exception as e:
         printT(e)
 
 
 #查询所有用户蓝币、等级
 def getAllUserInfo(userName):
-    id_num = 1
-    for ck in cookies:
+    for id_num, ck in enumerate(cookies, start=1):
         headers = setHeaders(ck)
         try:
             totalBlue,shopName = getBlueCoinInfo(headers)
@@ -372,10 +351,9 @@ def getAllUserInfo(userName):
         except Exception as e:
             # printT(e)
             printT(f"账号{id_num}【{userName}】异常请检查ck是否正常~")
-        id_num += 1
 #查询商品
 def smtg_queryPrize(headers, coinToBeans):
-    url = 'https://api.m.jd.com/api?appid=jdsupermarket&functionId=smt_queryPrizeAreas&clientVersion=8.0.0&client=m&body=%7B%22channel%22:%2218%22%7D&t={}'.format(int(round(time.time() * 1000)))
+    url = f'https://api.m.jd.com/api?appid=jdsupermarket&functionId=smt_queryPrizeAreas&clientVersion=8.0.0&client=m&body=%7B%22channel%22:%2218%22%7D&t={int(round(time.time() * 1000))}'
     try:
         respone = requests.get(url=url, verify=False, headers=headers)
         result = respone.json()
@@ -385,17 +363,14 @@ def smtg_queryPrize(headers, coinToBeans):
                 if coinToBeans in x['name']:
                     areaId = alist['areaId']
                     periodId = alist['periodId']
-                    if alist['areaId'] != 6:
-                        skuId = x['skuId']
-                    else:
-                        skuId = 0
+                    skuId = x['skuId'] if alist['areaId'] != 6 else 0
                     title = x['name']
                     prizeId = x['prizeId']
                     blueCost = x['cost']
                     status = x['status']
                     return title, prizeId, blueCost, status, skuId, areaId, periodId
-        # printT("请检查设置的兑换商品名称是否正确？")
-        # return 0, 0, 0, 0, 0
+            # printT("请检查设置的兑换商品名称是否正确？")
+            # return 0, 0, 0, 0, 0
     except Exception as e:
         printT(e)
 
@@ -408,7 +383,6 @@ def isCoinToBeans(coinToBeans,headers):
             return title, prizeId, blueCost, status, skuId, areaId, periodId
         except Exception as e:
             printT(e)
-            pass
     else:
         printT("1.请检查设置的兑换商品名称是否正确?")
         exit(0)
@@ -457,7 +431,7 @@ def issmtg_obtainPrize(ck, user_num, prizeId, areaId, periodId, title):
         userName = userNameList[cookiesList.index(ck)]
         t_num = range(dd_thread)
         threads = []
-        for t in t_num:
+        for _ in t_num:
             thread = TaskThread(smtg_obtainPrize, args=(prizeId, areaId, periodId, setHeaders(ck), userName))
             threads.append(thread)
             thread.start()
@@ -484,17 +458,15 @@ def issmtg_obtainPrize(ck, user_num, prizeId, areaId, periodId, title):
 def checkUser(cookies,): #返回符合条件的ck list
     global title, prizeId, blueCost, status, skuId, areaId, periodId
     cookieList=[]
-    user_num=1
     a = 0
-    for i in cookies:
+    for user_num, i in enumerate(cookies, start=1):
         headers = setHeaders(i)
         userName = userNameList[cookiesList.index(i)]
         try:
             totalBlue, shopName = getBlueCoinInfo(headers)
-            if totalBlue != 0:
-                if a == 0:
-                    a = 1
-                    title, prizeId, blueCost, status, skuId, areaId, periodId = isCoinToBeans(coinToBeans,headers)
+            if totalBlue != 0 and a == 0:
+                a = 1
+                title, prizeId, blueCost, status, skuId, areaId, periodId = isCoinToBeans(coinToBeans,headers)
             totalBlueW = totalBlue / 10000
             if user_num == 1:
                 printT("您已设置兑换的商品：【{0}】 需要{1}w蓝币".format(title, blueCost / 10000))
@@ -506,9 +478,7 @@ def checkUser(cookies,): #返回符合条件的ck list
                 printT(f"账号{user_num}:【{userName}】蓝币:{totalBlueW}万...no")
         except Exception as e:
             printT(f"账号{user_num}:【{userName}】，该用户异常，查不到商品关键词【{coinToBeans}】")
-        user_num += 1
-
-    if len(cookieList) >0:
+    if cookieList:
         printT("共有{0}个账号符合兑换条件".format(len(cookieList)))
         return cookieList
     else:
@@ -519,10 +489,10 @@ def checkUser(cookies,): #返回符合条件的ck list
 def start():
     try:
         global  cookiesList, userNameList, pinNameList, cookies, qgendtime
-        printT("{} Start".format(script_name))
+        printT(f"{script_name} Start")
         cookiesList, userNameList, pinNameList = getCk.iscookie()
         cookies = checkUser(cookiesList)
-        qgendtime = '{} {}'.format(tomorrow, endtime)
+        qgendtime = f'{tomorrow} {endtime}'
         if blueCoin_Cc:
             msg("并发模式：多账号")
         else:
@@ -531,9 +501,9 @@ def start():
         while True:
             nowtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f8')
             if nowtime > starttime:
+                user_num = 1
                 if blueCoin_Cc:
                     ttt = []
-                    user_num = 1
                     for ck in cookies:
                         thread = TaskThread(issmtg_obtainPrize, args=(ck, user_num, prizeId, areaId, periodId, title))
                         ttt.append(thread)
@@ -545,7 +515,6 @@ def start():
                     if result == 2:
                         break
                 else:
-                    user_num = 1
                     for ck in cookies:
                         response = issmtg_obtainPrize(ck, user_num, prizeId, areaId, periodId, title)
                         user_num += 1

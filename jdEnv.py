@@ -62,6 +62,5 @@ USER_AGENTS = USER_AGENTS[random.randint(0, len(USER_AGENTS) - 1)]
 def root():
     if 'Options:' in os.popen('sudo -h').read() or re.match(r'[C-Z]:.*', os.getcwd()):
         return True
-    else:
-        print('珍爱ck，远离docker')
-        return False
+    print('珍爱ck，远离docker')
+    return False
